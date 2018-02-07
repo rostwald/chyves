@@ -29,13 +29,13 @@ __dataset_install() {
 	local _pool="$1"
 	local _creation_stamp="Dataset originally created on $( date ) by chyves $_VERSION_LONG using dataset version $_VERSION_DATASET"
 	echo "Setting up chyves on $_pool..."
-	zfs create -o mountpoint=/chyves/$_pool $_pool/chyves
+	zfs create -o compression=on -o mountpoint=/chyves/$_pool $_pool/chyves
 	zfs create $_pool/chyves/.config
 	__freenas_create_symbolic_link   # This will only execute an action if on FreeNAS system.
 	touch /chyves/$_pool/.config/pool.cfg
 	__write_property_value_to_config_file "manual" "creation"        "$_creation_stamp" "/chyves/$_pool/.config/pool.cfg"
 	__write_property_value_to_config_file "manual" "dataset_version" "$_VERSION_DATASET" "/chyves/$_pool/.config/pool.cfg"
-	zfs create $_pool/chyves/guests
+	zfs create -o compression=on $_pool/chyves/guests
 
 	# A chyves pool is already setup, so setup as secondary pool.
 	if [ -n "$_PRIMARY_POOL" ]; then
@@ -55,8 +55,8 @@ __dataset_install() {
 		zfs create -o compression=on $_PRIMARY_POOL/chyves/logs
 		_LOG_TO_FILE="YES"
 		__log 2 "Creating ISO and Firmware resource datasets..."
-		zfs create $_PRIMARY_POOL/chyves/Firmware
-		zfs create $_PRIMARY_POOL/chyves/ISO
+		zfs create -o compression=on $_PRIMARY_POOL/chyves/Firmware
+		zfs create -o compression=on $_PRIMARY_POOL/chyves/ISO
 
 		# Hosts on FreeBSD 10.3 or above need to use the "-S" bhyve wire memory flag otherwise fun stuff happens at memory starvation.
 		if [ "$_OS_VERSION_DATE" -lt "1003000" ]; then
